@@ -53,6 +53,14 @@ body {
     background: linear-gradient(135deg, #ff6600, #ffcc00);
 }
 
+/* Highlight selected FAQ item */
+.faq-item.selected {
+    background: linear-gradient(135deg, #ff6600, #ffcc00);
+    color: #1a0000;
+    transform: scale(1.07);
+    box-shadow: 0 12px 25px rgba(255,153,51,0.7);
+}
+
 /* ---------- Chat Container (Right) ---------- */
 .chat-container {
     flex-grow: 1;
@@ -193,4 +201,77 @@ body {
 #send-btn:hover {
     transform: translateY(-2px) scale(1.06);
     box-shadow: 0 12px 25px rgba(255,153,51,0.7);
+}
+
+/* ---------- Social Links in Header ---------- */
+.social-links {
+    margin-top: 10px;
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.social-links a {
+    color: #1a0000;
+    text-decoration: none;
+    font-weight: 600;
+    transition: transform 0.2s;
+}
+
+.social-links a:hover {
+    transform: scale(1.1);
+}
+
+/* ---------- Mobile Responsiveness ---------- */
+.faq-toggle-btn {
+    display: none; /* Hidden by default on PC */
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 1000;
+    padding: 10px 15px;
+    background: linear-gradient(90deg, #ff6600, #ffcc00);
+    color: #1a0000;
+    border: none;
+    border-radius: 20px;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+    body {
+        flex-direction: column; /* Stack chat and FAQ vertically */
+        padding-top: 70px; /* Space for toggle button */
+    }
+
+    .faq-toggle-btn {
+        display: block; /* Show button */
+    }
+
+    .faq-container {
+        position: fixed;
+        top: 0;
+        left: -100%; /* Start off-screen */
+        width: 80%;
+        height: 100%;
+        z-index: 999;
+        transition: left 0.4s ease-in-out;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .faq-container.open {
+        left: 0; /* Slide in */
+    }
+
+    .chat-container {
+        width: 100%;
+        max-width: none;
+        height: calc(100vh - 80px); /* Adjust for mobile */
+    }
+
+    .social-links { flex-direction: column; gap: 10px; }
 }
