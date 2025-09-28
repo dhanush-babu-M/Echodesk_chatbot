@@ -1,227 +1,284 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // -------------------------------
-    // Element references
-    // -------------------------------
-    const userInput = document.getElementById("user-input");
-    const sendBtn = document.getElementById("send-btn");
-    const chatBox = document.getElementById("chat-box");
-    const faqContainer = document.querySelector(".faq-container");
-    let questionCount = 0;
+// -------------------------------
+// Element references
+// -------------------------------
+const userInput = document.getElementById("user-input");
+const sendBtn = document.getElementById("send-btn");
+const chatBox = document.getElementById("chat-box");
+const faqContainer = document.querySelector(".faq-container");
+let questionCount = 0;
 
-    // -------------------------------
-    // Add social links dynamically in header
-    // -------------------------------
-    const addSocialLinks = () => {
-        const header = document.querySelector(".chat-header");
-        if (!header) return;
+// -------------------------------
+// Add social links dynamically in header
+// -------------------------------
+const addSocialLinks = () => {
+    const header = document.querySelector(".chat-header");
+    if (!header) return;
 
-        const socialContainer = document.createElement("div");
-        socialContainer.className = "social-links";
-        socialContainer.innerHTML = `
-            <a href="https://www.linkedin.com/in/dhanush-babu-mamuduru-3863a2276" target="_blank">LinkedIn</a>
-            <a href="https://github.com/dhanush-babu-M" target="_blank">GitHub</a>
-            <a href="https://www.instagram.com/just._.dhanush69/" target="_blank">Instagram</a>
-        `;
-        header.appendChild(socialContainer);
-    };
+    const socialContainer = document.createElement("div");
+    socialContainer.className = "social-links";
+    socialContainer.innerHTML = `
+        <a href="https://www.linkedin.com/in/dhanush-babu-mamuduru-3863a2276" target="_blank">LinkedIn</a>
+        <a href="https://github.com/dhanush-babu-M" target="_blank">GitHub</a>
+        <a href="https://www.instagram.com/just._.dhanush69/" target="_blank">Instagram</a>
+    `;
+    header.appendChild(socialContainer);
+};
 
-    // -------------------------------
-    // Mobile FAQ toggle button
-    // -------------------------------
-    const setupMobileToggle = () => {
-        const toggleButton = document.createElement("button");
-        toggleButton.className = "faq-toggle-btn";
-        toggleButton.textContent = "☰ Ask Me";
-        document.body.prepend(toggleButton);
+// -------------------------------
+// Mobile FAQ toggle button
+// -------------------------------
+const setupMobileToggle = () => {
+    const toggleButton = document.createElement("button");
+    toggleButton.className = "faq-toggle-btn";
+    toggleButton.textContent = "☰ Ask Me";
+    document.body.prepend(toggleButton);
 
-        toggleButton.addEventListener("click", () => faqContainer.classList.toggle("open"));
+    toggleButton.addEventListener("click", () => faqContainer.classList.toggle("open"));
 
-        // Close FAQ on mobile after selecting a question
-        faqContainer.addEventListener("click", (e) => {
-            if (e.target.tagName === "LI" && window.innerWidth <= 768) {
-                faqContainer.classList.remove("open");
+    // Close FAQ on mobile after selecting a question
+    faqContainer.addEventListener("click", (e) => {
+        if (e.target.tagName === "LI" && window.innerWidth <= 768) {
+            faqContainer.classList.remove("open");
 
-                // Highlight selected question
-                const allItems = faqContainer.querySelectorAll("li");
-                allItems.forEach(li => li.classList.remove("selected"));
-                e.target.classList.add("selected");
-            }
-        });
+            // Highlight selected question
+            const allItems = faqContainer.querySelectorAll("li");
+            allItems.forEach(li => li.classList.remove("selected"));
+            e.target.classList.add("selected");
+        }
+    });
 
-        // Ensure FAQ closes on resize if screen > 768px
-        window.addEventListener("resize", () => {
-            if (window.innerWidth > 768) faqContainer.classList.remove("open");
-        });
-    };
+    // Ensure FAQ closes on resize if screen > 768px
+    window.addEventListener("resize", () => {
+        if (window.innerWidth > 768) faqContainer.classList.remove("open");
+    });
+};
 
-    // -------------------------------
-    // Smooth scroll for chat
-    // -------------------------------
-    const scrollToBottom = () => chatBox.scrollTo({ top: chatBox.scrollHeight, behavior: "smooth" });
+// -------------------------------
+// Smooth scroll for chat
+// -------------------------------
+const scrollToBottom = () => chatBox.scrollTo({ top: chatBox.scrollHeight, behavior: "smooth" });
 
-    // -------------------------------
-    // Add message to chat
-    // -------------------------------
-    const addMessage = (message, sender = "user") => {
+// -------------------------------
+// Add message to chat
+// -------------------------------
+const addMessage = (message, sender = "user") => {
+    const wrapper = document.createElement("div");
+    wrapper.className = `chat-message ${sender}-message fade-in`;
+
+    const avatar = document.createElement("div");
+    avatar.className = "avatar";
+    avatar.textContent = sender === "user" ? "🧑" : "🤖";
+
+    const bubble = document.createElement("div");
+    bubble.className = "bubble";
+    bubble.innerHTML = `<p>${message}</p>`;
+
+    wrapper.appendChild(avatar);
+    wrapper.appendChild(bubble);
+    chatBox.appendChild(wrapper);
+    scrollToBottom();
+    return bubble.querySelector("p");
+};
+
+// -------------------------------
+// Bot typing animation
+// -------------------------------
+const botTyping = async (message) => {
+    return new Promise(resolve => {
         const wrapper = document.createElement("div");
-        wrapper.className = `chat-message ${sender}-message fade-in`;
+        wrapper.className = "chat-message bot-message typing";
 
         const avatar = document.createElement("div");
         avatar.className = "avatar";
-        avatar.textContent = sender === "user" ? "🧑" : "🤖";
+        avatar.textContent = "🤖";
 
         const bubble = document.createElement("div");
         bubble.className = "bubble";
-        bubble.innerHTML = `<p>${message}</p>`;
+        bubble.innerHTML = `<p><span class="dots">...</span></p>`;
 
         wrapper.appendChild(avatar);
         wrapper.appendChild(bubble);
         chatBox.appendChild(wrapper);
         scrollToBottom();
-        return bubble.querySelector("p");
-    };
 
-    // -------------------------------
-    // Bot typing animation
-    // -------------------------------
-    const botTyping = async (message) => {
-        return new Promise(resolve => {
-            const wrapper = document.createElement("div");
-            wrapper.className = "chat-message bot-message typing";
+        let index = 0;
+        const p = document.createElement("p");
+        bubble.innerHTML = "";
+        bubble.appendChild(p);
 
-            const avatar = document.createElement("div");
-            avatar.className = "avatar";
-            avatar.textContent = "🤖";
+        const typeChar = () => {
+            if (index < message.length) {
+                p.textContent += message[index++];
+                scrollToBottom();
+                setTimeout(typeChar, 35);
+            } else {
+                wrapper.classList.remove("typing");
+                resolve();
+            }
+        };
 
-            const bubble = document.createElement("div");
-            bubble.className = "bubble";
-            bubble.innerHTML = `<p><span class="dots">...</span></p>`;
-
-            wrapper.appendChild(avatar);
-            wrapper.appendChild(bubble);
-            chatBox.appendChild(wrapper);
-            scrollToBottom();
-
-            let index = 0;
-            const p = document.createElement("p");
-            bubble.innerHTML = "";
-            bubble.appendChild(p);
-
-            const typeChar = () => {
-                if (index < message.length) {
-                    p.textContent += message[index++];
-                    scrollToBottom();
-                    setTimeout(typeChar, 35);
-                } else {
-                    wrapper.classList.remove("typing");
-                    resolve();
-                }
-            };
-
-            setTimeout(typeChar, 500);
-        });
-    };
-
-    // -------------------------------
-    // Time-based greeting
-    // -------------------------------
-    const getGreeting = () => {
-        const hour = new Date().getHours();
-        if (hour < 12) return "Good morning! 🌞";
-        if (hour < 18) return "Good afternoon! 🌤️";
-        return "Good evening! 🌙";
-    };
-
-    // -------------------------------
-    // Quote of the day
-    // -------------------------------
-    const quotes = [
-        "“The only way to do great work is to love what you do.” – Steve Jobs",
-        "“Learning never exhausts the mind.” – Leonardo da Vinci",
-        "“Success is not final, failure is not fatal: It is the courage to continue that counts.” – Winston Churchill",
-        "“Code is like humor. When you have to explain it, it’s bad.” – Cory House",
-        "“Simplicity is the soul of efficiency.” – Austin Freeman"
-    ];
-    const getRandomQuote = () => quotes[Math.floor(Math.random() * quotes.length)];
-
-    // -------------------------------
-    // Chatbot responses
-    // -------------------------------
-    const chatbotResponses = {
-        "do you know python": "Yes, I know Python. I can help with basics, syntax, and logic building.",
-        "do you know java": "Yes, I am familiar with Java and its use in full stack development.",
-        "tell about yourself": "I am EchoDesk, your virtual helpdesk chatbot created to answer your questions.",
-        "what is your purpose?": "I am designed to assist users by answering questions and providing helpful information."
-        // Add more Q&A here
-    };
-    const supportedQuestions = Object.keys(chatbotResponses);
-
-    // -------------------------------
-    // Render FAQ
-    // -------------------------------
-    const renderFAQ = () => {
-        const title = document.createElement("h3");
-        title.textContent = "Ask Me Professionally:";
-        faqContainer.appendChild(title);
-
-        const list = document.createElement("ul");
-        supportedQuestions.forEach(q => {
-            const li = document.createElement("li");
-            li.textContent = q;
-            li.className = "faq-item";
-            li.addEventListener("click", () => handleQuestion(q));
-            list.appendChild(li);
-        });
-        faqContainer.appendChild(list);
-    };
-
-    // -------------------------------
-    // Handle question selection
-    // -------------------------------
-    const handleQuestion = async (question) => {
-        questionCount++;
-        addMessage(`${questionCount}. ${question.charAt(0).toUpperCase() + question.slice(1)}`, "user");
-
-        const answer = typeof chatbotResponses[question] === "function"
-            ? chatbotResponses[question]()
-            : chatbotResponses[question] || "I currently answer only the listed professional questions.";
-
-        await botTyping(answer);
-    };
-
-    // -------------------------------
-    // Handle user input
-    // -------------------------------
-    const handleSend = () => {
-        const msg = userInput.value.trim();
-        if (!msg) return;
-
-        const lowerMsg = msg.toLowerCase();
-        if (chatbotResponses[lowerMsg]) {
-            handleQuestion(lowerMsg);
-        } else {
-            addMessage(msg, "user");
-            botTyping("I don't have a pre-defined answer for that. Please select a question from the left.");
-        }
-
-        userInput.value = "";
-    };
-
-    sendBtn.addEventListener("click", handleSend);
-    userInput.addEventListener("keypress", e => {
-        if (e.key === "Enter") handleSend();
+        setTimeout(typeChar, 500);
     });
+};
 
-    // -------------------------------
-    // Initialize everything
-    // -------------------------------
-    addSocialLinks();
-    setupMobileToggle();
-    renderFAQ();
+// -------------------------------
+// Time-based greeting
+// -------------------------------
+const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good morning! 🌞";
+    if (hour < 18) return "Good afternoon! 🌤️";
+    return "Good evening! 🌙";
+};
 
-    // Initial greeting with quote
-    setTimeout(() => {
-        const greeting = getGreeting();
-        botTyping(`${greeting} Hello! I am EchoDesk, your professional AI assistant. Click any question on the left or type your own to start.\nHere's a motivational quote for today:\n"${getRandomQuote()}"`);
-    }, 500);
+// -------------------------------
+// Quote of the day
+// -------------------------------
+const quotes = [
+    "“The only way to do great work is to love what you do.” – Steve Jobs",
+    "“Learning never exhausts the mind.” – Leonardo da Vinci",
+    "“Success is not final, failure is not fatal: It is the courage to continue that counts.” – Winston Churchill",
+    "“Code is like humor. When you have to explain it, it’s bad.” – Cory House",
+    "“Simplicity is the soul of efficiency.” – Austin Freeman"
+];
+const getRandomQuote = () => quotes[Math.floor(Math.random() * quotes.length)];
+
+// -------------------------------
+// Professional chatbot responses
+// -------------------------------
+const chatbotResponses = {
+    "tell me about yourself": 
+        "Hello! I am EchoDesk, a futuristic AI-powered chatbot designed to provide professional IT guidance, answer programming queries, and assist users with structured information efficiently.",
+    "who created you": 
+        "I was developed by Dhanush Babu Mamuduru, an Electronics & Communication Engineer from Nellore, Andhra Pradesh.",
+    "what makes you special": 
+        "I combine rule-based logic with basic machine learning techniques, offering instant, accurate responses while continuously learning from interactions.",
+    "how can you help me": 
+        "I provide guidance on programming, career advice in IT/software, AI/ML project insights, and structured responses for professional queries.",
+    "what are your key features": 
+        "Instant response, professional knowledge base, AI-assisted suggestions, and user-friendly interaction for learning or guidance.",
+    "give me a quotation": () => getRandomQuote(),
+
+    "tell me about dhanush": 
+        "Dhanush Babu Mamuduru is from Nellore, Andhra Pradesh, and completed B.Tech in Electronics & Communication Engineering. He completed a two-month internship in Artificial Intelligence at EduStation and developed the EchoDesk chatbot as part of his learning.",
+    "what are dhanush's strengths": 
+        "Dhanush has strong programming skills, problem-solving ability, quick learning, and experience in AI/ML and full-stack development.",
+    "what are dhanush's career goals": 
+        "Dhanush aims to work in software development, focusing on AI, full-stack applications, and building innovative projects that solve real-world problems.",
+    "what inspired dhanush to build you": 
+        "He wanted to combine AI knowledge with practical experience and create a professional chatbot that can assist users in learning and IT guidance.",
+    "what kind of projects has dhanush worked on": 
+        "Dhanush has worked on AI-based chatbots, accident detection using GPS/GSM, and environmental awareness projects.",
+    "what is dhanush's approach to learning": 
+        "He follows hands-on practice, builds small projects, and gradually scales to more complex applications.",
+    "does dhanush prefer any programming language": 
+        "He enjoys Python for AI/ML projects and Java for full-stack development, depending on the project requirements.",
+    "any advice from dhanush for beginners": 
+        "Start with fundamentals, practice consistently, work on small projects, and gradually explore modern technologies.",
+
+    "what programming languages do you know": 
+        "Dhanush is proficient in Python, Java, SQL, C, C++, HTML, CSS, and JavaScript. He also uses Python libraries like NumPy, Pandas, Matplotlib, and Scikit-learn for AI/ML projects.",
+    "what technologies/tools did you use and why": 
+        "Python → core programming language\nNumPy & Pandas → data preprocessing & analysis\nMatplotlib → visualization\nScikit-learn → building/testing ML models.",
+    "which platform/ide did you use": 
+        "Jupyter Notebook for testing/visualization. For bigger projects, PyCharm, IntelliJ, or Eclipse would be ideal.",
+    "can you explain your internship in simple terms": 
+        "Dhanush completed a two-month AI internship at EduStation, learning fundamentals of AI & ML with Python, and developed a simple AI-based chatbot.",
+    "what problem does your project solve": 
+        "The EchoDesk chatbot automates basic customer support, answering common queries instantly, saving time and improving user experience.",
+    "what challenges did you face": 
+        "Challenges included handling diverse user inputs and limited sample data. Preprocessing and testing improved chatbot accuracy.",
+    "what was your role in the project": 
+        "Dhanush learned the concepts and implemented them in EchoDesk, preparing sample questions and testing responses.",
+    "how is this useful in real life": 
+        "Chatbots are used in banking, e-commerce, and customer support. EchoDesk gave practical experience in applying AI & ML in real-world problems.",
+    "how is this internship useful for IT/software jobs": 
+        "It improved programming, data handling, problem-solving, and project experience — skills transferable to Java development & full-stack projects.",
+    "if you were to improve the chatbot project, what would you add": 
+        "Integrate NLP libraries like spaCy for better understanding and connect the bot to web/mobile interfaces.",
+    "how did you prepare the chatbot": 
+        "Collected questions/responses, preprocessed text, and implemented logic to match user inputs.",
+    "what type of chatbot did you build": 
+        "A rule-based chatbot with basic AI elements and simple ML techniques.",
+    "did you use machine learning for the chatbot": 
+        "Yes, Scikit-learn was used for text classification to categorize inputs into greetings, FAQs, or closing statements.",
+    "how long did it take to build you": 
+        "The development of EchoDesk, including learning, designing, and testing, took approximately 2 months.",
+    "can you handle multiple questions": 
+        "Yes, I can answer multiple professional queries one after another and provide structured guidance."
+};
+
+const supportedQuestions = Object.keys(chatbotResponses);
+
+// -------------------------------
+// Render FAQ
+// -------------------------------
+const renderFAQ = () => {
+    const title = document.createElement("h3");
+    title.textContent = "Ask Me Professionally:";
+    faqContainer.appendChild(title);
+
+    const list = document.createElement("ul");
+    supportedQuestions.forEach(q => {
+        const li = document.createElement("li");
+        li.textContent = q;
+        li.className = "faq-item";
+        li.addEventListener("click", () => handleQuestion(q));
+        list.appendChild(li);
+    });
+    faqContainer.appendChild(list);
+};
+
+// -------------------------------
+// Handle question selection
+// -------------------------------
+const handleQuestion = async (question) => {
+    questionCount++;
+    addMessage(`${questionCount}. ${question.charAt(0).toUpperCase() + question.slice(1)}`, "user");
+
+    const answer = typeof chatbotResponses[question] === "function"
+        ? chatbotResponses[question]()
+        : chatbotResponses[question] || "I currently answer only the listed professional questions.";
+
+    await botTyping(answer);
+};
+
+// -------------------------------
+// Handle user input
+// -------------------------------
+const handleSend = () => {
+    const msg = userInput.value.trim();
+    if (!msg) return;
+
+    const lowerMsg = msg.toLowerCase();
+    if (chatbotResponses[lowerMsg]) {
+        handleQuestion(lowerMsg);
+    } else {
+        addMessage(msg, "user");
+        botTyping("I don't have a pre-defined answer for that. Please select a question from the left.");
+    }
+
+    userInput.value = "";
+};
+
+sendBtn.addEventListener("click", handleSend);
+userInput.addEventListener("keypress", e => {
+    if (e.key === "Enter") handleSend();
+});
+
+// -------------------------------
+// Initialize everything
+// -------------------------------
+addSocialLinks();
+setupMobileToggle();
+renderFAQ();
+
+// Initial greeting with quote
+setTimeout(() => {
+    const greeting = getGreeting();
+    botTyping(`${greeting} Hello! I am EchoDesk, your professional AI assistant. Click any question on the left or type your own to start.\nHere's a motivational quote for today:\n"${getRandomQuote()}"`);
+}, 500);
+
+
 });
