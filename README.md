@@ -2,6 +2,10 @@
 
 A professional, web-based AI assistant built with Python and Flask. This project showcases skills in backend development, front-end integration, and basic natural language processing.
 
+## 🚀 Live Demo
+
+**You can view and interact with the live project here:** ### [https://echodesk-chatbot.onrender.com](https://echodesk-chatbot.onrender.com)
+
 
 
 ## ✨ Features
@@ -16,6 +20,7 @@ A professional, web-based AI assistant built with Python and Flask. This project
 * **Backend:** Python, Flask
 * **Frontend:** HTML, CSS, JavaScript
 * **Data:** PyYAML for data serialization
+* **Deployment:** Render, Gunicorn
 
 ## 🚀 How to Run Locally
 
